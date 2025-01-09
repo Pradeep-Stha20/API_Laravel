@@ -6,8 +6,9 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\API\BaseController as BaseController;
 
-class PostController extends Controller
+class PostController extends BaseController
 {
     /**
      * Display a listing of the resource.
@@ -20,6 +21,7 @@ class PostController extends Controller
             'message' => 'ALL POST DATA.',
             'data' => $data,
         ],200);
+        
     }
 
     /**
@@ -102,13 +104,14 @@ class PostController extends Controller
                 ],401);
             }
 
-            $post = Post::select('id','image')->get();
+            $postImage = Post::select('id','image')
+            ->where(['id'=> $id])->get();
 
             if($request->image != ''){
                 $path = public_path().'/uploads';
 
-                if($post->image != '' && $post->image != null){
-                    $old_file = $path.$post->image;
+                if($postImage[0]->image != '' && $postImage[0]->image != null){
+                    $old_file = $path.$postImage[0]->image;
                     if(file_exists($old_file)){
                         unlink($old_file);
                     }
@@ -116,10 +119,10 @@ class PostController extends Controller
                 $img = $request->image;
                 $ext = $img->getClientOriginalExtension();
                 $imageName = time().'.'. $ext;
-                $img->move(public_path().'/uploads', $imageName);
+                $img->move(public_path(). '/uploads', $imageName);
 
             }else{
-                $imageName = $post->image;
+                $imageName = $postImage->image;
             }
 
             $post = Post::where(['id'=> $id])->update([
@@ -141,7 +144,7 @@ class PostController extends Controller
     public function destroy(string $id)
     {
         $imagePath = Post::select('image')->where('id', $id)->get ();
-        $filepath = public_path().'/uploads'.$imagePath[0]['image'];
+        $filepath = public_path().'/uploads/'.$imagePath[0]['image'];
 
         unlink($filepath);
         
