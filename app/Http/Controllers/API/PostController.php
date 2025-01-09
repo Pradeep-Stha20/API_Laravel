@@ -16,12 +16,14 @@ class PostController extends BaseController
     public function index()
     {
         $data['posts'] = Post::all();
-        return response()->json([
-            'status'=> true,
-            'message' => 'ALL POST DATA.',
-            'data' => $data,
-        ],200);
-        
+
+        //this part is optional manual code before optimization
+        // return response()->json([
+        //     'status'=> true,
+        //     'message' => 'ALL POST DATA.',
+        //     'data' => $data,
+        // ],200);
+        return $this->sendResponse($data,'ALL POST DATA.');
     }
 
     /**
@@ -38,11 +40,15 @@ class PostController extends BaseController
             ]
             );
             if($validatorUser->fails()){
-                return response()->json([
-                    'status'=> false,
-                    'message' => 'Validation Error',
-                    'errors' => $validatorUser->errors()->all()
-                ],401);
+                //this is also response code for fail before code sanitaion.
+                // return response()->json([
+                //     'status'=> false,
+                //     'message' => 'Validation Error',
+                //     'errors' => $validatorUser->errors()->all()
+                // ],401);
+                return $this->sendError('Validation Error',$validatorUser->errors()->all());
+
+
             }
 
             $img = $request->image;
@@ -55,11 +61,15 @@ class PostController extends BaseController
                 'description'=> $request->description,
                 'image'=> $imageName,
                 ]);
-            return response()->json([
-                    'status'=> true,
-                    'message' => 'Post Created Successfully',
-                    'post'=> $post,
-                ],200);
+
+            //this is manual code befor optimization
+            // return response()->json([
+            //         'status'=> true,
+            //         'message' => 'Post Created Successfully',
+            //         'post'=> $post,
+            //     ],200);
+             return $this->sendResponse($post,'Post Created Successfully');
+
         
     }
 
@@ -75,11 +85,14 @@ class PostController extends BaseController
             'image',
         )->where(['id' => $id])->get();
 
-        return response()->json([
-            'status'=> true,
-            'message' => 'Your Single Post',
-            'data'=> $data,
-        ],200);
+        //this part is manual code before optimization.
+        // return response()->json([
+        //     'status'=> true,
+        //     'message' => 'Your Single Post',
+        //     'data'=> $data,
+        // ],200);
+        return $this->sendResponse($data,'Your Single Post');
+
     }
 
     /**
@@ -97,11 +110,14 @@ class PostController extends BaseController
         );
 
             if($validatorUser->fails()){
-                return response()->json([
-                    'status'=> false,
-                    'message' => 'Validation Error',
-                    'errors' => $validatorUser->errors()->all()
-                ],401);
+                //this is also response code for fail before code sanitaion.
+                // return response()->json([
+                //     'status'=> false,
+                //     'message' => 'Validation Error',
+                //     'errors' => $validatorUser->errors()->all()
+                // ],401);
+                return $this->sendError('Validation Error',$validatorUser->errors()->all());
+
             }
 
             $postImage = Post::select('id','image')
@@ -130,11 +146,15 @@ class PostController extends BaseController
                 'description'=> $request->description,
                 'image'=> $imageName,
                 ]);
-            return response()->json([
-                    'status'=> true,
-                    'message' => 'Post Updated Successfully',
-                    'post'=> $post,
-                ],200);
+
+            //this is response code before code sanitation.
+            // return response()->json([
+            //         'status'=> true,
+            //         'message' => 'Post Updated Successfully',
+            //         'post'=> $post,
+            //     ],200);
+                return $this->sendResponse($post,'Post Updated Successfully');
+
         
     }
 
@@ -150,11 +170,14 @@ class PostController extends BaseController
         
         $post = Post::where('id',$id)->delete();
 
+        //this is response code part before sanitation.
+        // return response()->json([
+        //     'status'=> true,
+        //     'message' => 'Post has been removed Successfully',
+        //     'post'=> $post,
+        // ],200);
 
-        return response()->json([
-            'status'=> true,
-            'message' => 'Post has been removed Successfully',
-            'post'=> $post,
-        ],200);
+        return $this->sendResponse($post,'Post has been removed Successfully');
+
     }
 }
