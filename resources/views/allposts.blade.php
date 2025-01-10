@@ -132,7 +132,7 @@
                             </td>
                             <td><button type="button" class="btn btn-sm btn-primary" data-bs-postid ="${post.id}" data-bs-toggle="modal" data-bs-target="#singlePostModal">View</button></td>
                             <td><button type="button" class="btn btn-sm btn-warning" data-bs-postid ="${post.id}" data-bs-toggle="modal" data-bs-target="#updatePostModal">Update</button></td>
-                            <td><button type="button" class="btn btn-sm btn-danger" data-bs-postid ="${post.id}" data-bs-toggle="modal" data-bs-target="#singlePostModal">Delete</button></td>
+                            <td><button onclick="deletePost(${post.id})" class="btn btn-sm btn-danger">Delete</button></td>
                         </tr>`
                         });
                         
@@ -252,6 +252,23 @@
             });
 
 
+    }
+
+    //Delete Post
+    async function deletePost(postId){
+        const token = localStorage.getItem('api_token');
+
+        let response = await fetch(`/api/posts/${postId}`,{
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                window.location.href = "http://127.0.0.1:8000/allposts"
+            });
     }
 </script>
   </body>
