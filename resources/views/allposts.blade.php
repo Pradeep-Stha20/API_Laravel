@@ -131,7 +131,7 @@
                                 </p>
                             </td>
                             <td><button type="button" class="btn btn-sm btn-primary" data-bs-postid ="${post.id}" data-bs-toggle="modal" data-bs-target="#singlePostModal">View</button></td>
-                            <td><button type="button" class="btn btn-sm btn-warning" data-bs-postid ="${post.id}" data-bs-toggle="modal" data-bs-target="#updatePostModal">Update</button></td>
+                            <td><button type="button" class="btn btn-sm btn-success" data-bs-postid ="${post.id}" data-bs-toggle="modal" data-bs-target="#updatePostModal">Update</button></td>
                             <td><button onclick="deletePost(${post.id})" class="btn btn-sm btn-danger">Delete</button></td>
                         </tr>`
                         });
