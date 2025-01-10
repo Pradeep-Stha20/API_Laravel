@@ -105,7 +105,7 @@ class PostController extends BaseController
             [
                 'title'=> 'required',
                 'description'=> 'required',
-                'image'=> 'required|mimes:png,jpg,jpeg,gif',
+                'image'=> 'nullable|image|mimes:png,jpg,jpeg,gif',
             ] 
         );
 
@@ -124,7 +124,7 @@ class PostController extends BaseController
             ->where(['id'=> $id])->get();
 
             if($request->image != ''){
-                $path = public_path().'/uploads';
+                $path = public_path().'/uploads/';
 
                 if($postImage[0]->image != '' && $postImage[0]->image != null){
                     $old_file = $path.$postImage[0]->image;
@@ -138,7 +138,7 @@ class PostController extends BaseController
                 $img->move(public_path(). '/uploads', $imageName);
 
             }else{
-                $imageName = $postImage->image;
+                $imageName = $postImage[0]->image;
             }
 
             $post = Post::where(['id'=> $id])->update([
