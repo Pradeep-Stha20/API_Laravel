@@ -22,41 +22,36 @@
         <div class="row">
             <div class="row-8">
                 <div id="postContainer">
-                    <table class="table table-table-bordered">
-                        <tr class="table-dark">
-                            <th>Image</th>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>View</th>
-                            <th>Update</th>
-                            <th>Delete</th>
-                        </tr>
-                        <tr>
-                            <td><img src="" width="150px" /></td>
-                            <td>
-                                <h6>Post Title 1</h6>
-                            </td>
-                            <td>
-                                <p>
-                                    Lorem ipsum dolor, sit amet consectetur adipisicing elit. Consequuntur assumenda dolorum accusamus animi nam repellendus, quis eligendi minima nostrum eius sit maiores ut blanditiis consequatur. Totam fuga ipsum officia doloribus.
-                                </p>
-                            </td>
-                            <td><button type="button" class="btn btn-sm btn-primary">View</button></td>
-                            <td><button type="button" class="btn btn-sm btn-warning">Update</button></td>
-                            <td><button onclick="deletepost(${post.id})" class="btn btn-sm btn-danger">Delete</button></td>
-                        </tr>
-                    </table>
+                    
                 </div>
             </div>
         </div>
 
     </div>
+
+    {{-- Single Post model --}}
+    <div class="modal fade" id="singlePostModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="singlePostLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title fs-5" id="singlePostLabel">Single Post</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              ...
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
 
     <script>
         document.querySelector("#logoutBtn").addEventListener('click',function(){
-            const token =localStorage.getItem('api_token')
+            const token =localStorage.getItem('api_token');
     
             fetch('/api/logout',{
                 method: 'POST',
@@ -81,11 +76,82 @@
             })
             .then(response => response.json())
             .then(data =>{
-                console.log(data);
+                //console.log(data.data.posts);
+                var allpost = data.data.posts;
+                const postContainer = document.querySelector('#postContainer');
                 //window.location.href = 'http://localhost:8000/';
+
+                var tabledata = `<table class="table table-table-bordered">
+                        <tr class="table-dark">
+                            <th>Image</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>View</th>
+                            <th>Update</th>
+                            <th>Delete</th>
+                        </tr>`;
+                        
+                        allpost.forEach(post => {
+                            tabledata += `<tr>
+                            <td><img src="/uploads/${post.image}" width="150px" /></td>
+                            <td>
+                                <h6>${post.title}</h6>
+                            </td>
+                            <td>
+                                <p>
+                                ${post.description}
+                                </p>
+                            </td>
+                            <td><button type="button" class="btn btn-sm btn-primary" data-bs-postid ="${post.id}" data-bs-toggle="modal" data-bs-target="#singlePostModal">View</button></td>
+                            <td><button type="button" class="btn btn-sm btn-warning" data-bs-postid ="${post.id}" data-bs-toggle="modal" data-bs-target="#updatePostModal">Update</button></td>
+                            <td><button type="button" class="btn btn-sm btn-danger" data-bs-postid ="${post.id}" data-bs-toggle="modal" data-bs-target="#singlePostModal">Delete</button></td>
+                        </tr>`
+                        });
+                        
+                        tabledata += `</table>`;
+
+                        postContainer.innerHTML = tabledata;
             });
         }
         loadData();
-    </script>
+
+        //open single post modal
+        var singleModal =document.querySelector('#singlePostModal');
+        if (singleModal) {
+        singleModal.addEventListener('show.bs.modal', event => {
+            // Button that triggered the modal
+            const button = event.relatedTarget
+            
+            const modalBody =document.querySelector("#singlePostModal .modal-body");
+                modalBody.innerHTML = "";
+            // Extract info from data-bs-* attributes
+            const id = button.getAttribute('data-bs-postid')
+            const token =localStorage.getItem('api_token');
+    
+            fetch(`/api/posts/${id}`,{
+                method: 'GET',
+                headers:{
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type' : 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data =>{
+                const post = data.data.post[0];
+
+                
+                modalBody.innerHTML = `
+                Title : ${post.title}
+                <br>
+                Description : ${post.description}
+                <br>
+                <br>
+                <img width="150px" src="http://localhost:8000/uploads/${post.image}" />
+                `;
+            });
+            
+        })
+        }
+</script>
   </body>
 </html>
