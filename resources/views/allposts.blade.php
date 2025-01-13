@@ -273,6 +273,186 @@
                 window.location.href = "http://127.0.0.1:8000/allposts"
             });
     }
+
+    <script>
+        $(document).ready(function () {
+            var table = $('#myTable').DataTable({
+                "ajax": {
+                    "url": "{{ route('getall') }}",
+                    "type": "GET",
+                    "dataType": "json",
+                    "headers": {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    "dataSrc": function (response) {
+                        if (response.status === 200) {
+                            return response.employees;
+                        } else {
+                            return [];
+                        }
+                    }
+                },
+                "columns": [
+                    { "data": "id" },
+                    { "data": "name" },
+                    { "data": "email" },
+                    { "data": "address" },
+                    { "data": "phone" },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return '<a href="#" class="btn btn-sm btn-success edit-btn" data-id="'+data.id+'" data-name="'+data.name+'" data-email="'+data.email+'" data-address="'+data.address+'" data-phone="'+data.phone+'">Edit</a> ' +
+                                   '<a href="#" class="btn btn-sm btn-danger delete-btn" data-id="'+data.id+'">Delete</a>';
+                        }
+                    }
+                ]
+            });
+    
+            // Export to Excel functionality
+            $('#exportBtn').click(function() {
+    var table = $('#myTable').DataTable();
+    var data = table.rows({search: 'applied'}).data();  // Get filtered rows
+    var ws_data = [];
+    
+    // Add company details
+    ws_data.push(['Company Name: Xelwel Innovation Pvt. Ltd.']);  // Replace with your company name
+    ws_data.push(['Email: info@xelwel.com.np']);  // Replace with your company email
+    ws_data.push(['Phone: +977-9843569096']);  // Replace with your company phone number
+    ws_data.push([]);  // Empty row for spacing
+
+    // Specify columns you want to export
+    var selectedColumns = ['id', 'name', 'email', 'address', 'phone'];
+
+    // Add headers to Excel sheet
+    var headers = [];
+    selectedColumns.forEach(function(col) {
+        headers.push(col.charAt(0).toUpperCase() + col.slice(1)); // Capitalize first letter
+    });
+    ws_data.push(headers);  // Add headers as the first row
+
+    // Add data rows to Excel sheet
+    data.each(function(value, index) {
+        var row = [];
+        selectedColumns.forEach(function(col) {
+            row.push(value[col]);  // Push only the selected columns' data
+        });
+        ws_data.push(row);  // Add row to the data
+    });
+
+    // Convert array of arrays to sheet and export
+    var ws = XLSX.utils.aoa_to_sheet(ws_data);  // Convert to sheet
+
+    // Add a company logo (optional)
+    // Note: Adding images directly to XLSX is more complex and requires additional libraries like xlsx-populate
+    // If this is essential, explore libraries like xlsx-populate or exceljs
+
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Employees');  // Append sheet to workbook
+    XLSX.writeFile(wb, 'intens.xlsx');  // Export Excel file
+});
+
+    
+            // Edit button functionality
+            $('#myTable tbody').on('click', '.edit-btn', function () {
+                var id = $(this).data('id');
+                var name = $(this).data('name');
+                var email = $(this).data('email');
+                var address = $(this).data('address');
+                var phone = $(this).data('phone');
+    
+                $('#edit-id').val(id);
+                $('#edit-name').val(name);
+                $('#edit-email').val(email);
+                $('#edit-address').val(address);
+                $('#edit-phone').val(phone);
+                $('#editModal').modal('show');
+            });
+    
+            // Employee form submit (add new employee)
+            $('#employee-form').submit(function (e) {
+                e.preventDefault();
+                const employeedata = new FormData(this);
+    
+                $.ajax({
+                    url: '{{ route('store') }}',
+                    method: 'post',
+                    data: employeedata,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.status == 200) {
+                            alert("Saved successfully");
+                            $('#employee-form')[0].reset();
+                            $('#exampleModal').modal('hide');
+                            $('#myTable').DataTable().ajax.reload();
+                        }
+                    }
+                });
+            });
+    
+            // Edit form submit (update employee)
+            $('#edit-form').submit(function (e) {
+                e.preventDefault();
+                const employeedata = new FormData(this);
+    
+                $.ajax({
+                    url: '{{ route('update') }}',
+                    method: 'POST',
+                    data: employeedata,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        if (response.status === 200) {
+                            alert(response.message);
+                            $('#edit-form')[0].reset();
+                            $('#editModal').modal('hide');
+                            $('#myTable').DataTable().ajax.reload();
+                        } else {
+                            alert(response.message);
+                        }
+                    }
+                });
+            });
+    
+            // Delete button functionality
+            $(document).on('click', '.delete-btn', function() {
+                var id = $(this).data('id');
+    
+                if (confirm('Are you sure you want to delete this employee?')) {
+                    $.ajax({
+                        url: '{{ route('delete') }}',
+                        type: 'DELETE',
+                        data: {id: id},
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            if (response.status === 200) {
+                                alert(response.message);
+                                $('#myTable').DataTable().ajax.reload();
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr);
+                            alert('Error: ' + error);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </script>
   </body>
 </html>
